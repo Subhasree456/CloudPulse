@@ -1,0 +1,39 @@
+# Render Blueprint for the CloudPulse API.
+# Deploy from the repository with cloudpulse/render.yaml selected, or create
+# the service manually with the same settings. This file only describes
+# configuration; it does not imply that a deployment already exists.
+services:
+  - type: web
+    name: cloudpulse-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT wsgi:app
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: SECRET_KEY
+        generateValue: true
+      - key: AGENT_ENROLLMENT_TOKEN
+        generateValue: true
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB
+        value: cloudpulse
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: ENABLE_BACKGROUND_WORKERS
+        value: "true"
+      # The hosted container is not a monitoring target; use remote agents.
+      - key: ENABLE_LOCAL_COLLECTOR
+        value: "false"
+      - key: MONITORING_INTERVAL
+        value: "5"
